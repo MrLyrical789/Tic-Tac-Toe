@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Kółko i krzyżyk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <Header>
+        <h1>Kółko <span id="i">i</span> <span>Krzyżyk</span></h1>
+
+        <h3 id="kolej">Gracz : <span id="turn">X</span></h3>
+    </Header>
+
+   <nav id="menu">
+    <h2>Wybierz ilość Graczy</h2>
+    <div id="pole_wyboru">
+        
+        <p>
+            <button id="jeden" onclick="game_1p()">Jeden Gracz</button>
+            <button onclick="game_2p()">Dwóch Graczy</button>
+        </p>
+    </div>
+    
+
+   </nav>
+
+    <main>
+        <div id="game_1p">
+            <div id="kolumna0" class="kolumna gora lewo 1p">X</div>
+            <div id="kolumna1" class="kolumna gora 1p">O</div>
+            <div id="kolumna2" class="kolumna gora prawo 1p">X</div>
+            <div id="kolumna3" class="kolumna srodek lewo 1p">O</div>
+            <div id="kolumna4" class="kolumna 1p">X</div>
+            <div id="kolumna5" class="kolumna srodek prawo 1p">X</div>
+            <div id="kolumna6" class="kolumna dol lewo 1p">O</div>
+            <div id="kolumna7" class="kolumna dol 1p">X</div>
+            <div id="kolumna8" class="kolumna dol prawo 1p">X</div>
+        </div>
+        
+    
+        <div id="game_2p">
+            <div id="kolumna0" class="kolumna gora lewo"></div>
+            <div id="kolumna1" class="kolumna gora"></div>
+            <div id="kolumna2" class="kolumna gora prawo"></div>
+            <div id="kolumna3" class="kolumna srodek lewo"></div>
+            <div id="kolumna4" class="kolumna"></div>
+            <div id="kolumna5" class="kolumna srodek prawo"></div>
+            <div id="kolumna6" class="kolumna dol lewo"></div>
+            <div id="kolumna7" class="kolumna dol"></div>
+            <div id="kolumna8" class="kolumna dol prawo"></div>
+        </div>
+
+        
+    </main>
+    
+    <div id="wynik"></div>
+    <button id="Restart" onclick="restart()">RESTART</button>
+    
+</body>
+
+
+<script>
+    let wygrana = false; 
+    let pola; 
+
+    function game_1p() {
+        przygotujPlansze("game_1p");
+        przypiszKlikniecia(klikniecie1p);
+        turn.innerText = "X";
+    }
+
+    function game_2p() {
+        przygotujPlansze("game_2p");
+        przypiszKlikniecia(klikniecie2p);
+    }
+
+    function przygotujPlansze(idPlanszy) {
+        pola = document.querySelectorAll(`#${idPlanszy} .kolumna`);
+        for (let i = 0; i < pola.length; i++) {
+            pola[i].innerText = "";
+        }
+
+        
+        document.getElementById("game_1p").style.display = idPlanszy === "game_1p" ? "grid" : "none";
+        document.getElementById("game_2p").style.display = idPlanszy === "game_2p" ? "grid" : "none";
+        document.getElementById("menu").style.display = "none";
+        document.getElementById("kolej").style.display = "block";
+        document.getElementById("Restart").style.display = "block";
+        document.getElementById("wynik").innerText = "";
+        wygrana = false;
+    }
+
+    function restart() {
+        
+        document.getElementById("menu").style.display = "block";
+        document.getElementById("game_1p").style.display = "none";
+        document.getElementById("game_2p").style.display = "none";
+        document.getElementById("Restart").style.display = "none";
+        document.getElementById("kolej").style.display = "none";
+        document.getElementById("wynik").innerText = "";
+    }
+
+    function sprawdz() {
+        const wygrane = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+   
+        for (let i = 0; i < wygrane.length; i++) {
+            const [a, b, c] = wygrane[i];
+            if (pola[a].textContent && pola[a].textContent === pola[b].textContent && pola[a].textContent === pola[c].textContent) {
+                wygrana = true;
+                if (pola[a].textContent === "X") {
+                    document.getElementById("wynik").style.color = "blue";
+                } else {
+                    document.getElementById("wynik").style.color = "red";
+                }
+                document.getElementById("wynik").innerText = `Wygrywa ${pola[a].textContent}`;
+                return true;
+            }
+        }
+
+      
+        const wszystkieZajete = Array.from(pola).every(pole => pole.textContent);
+        if (wszystkieZajete && !wygrana) {
+            document.getElementById("wynik").style.color = "white";
+            document.getElementById("wynik").innerText = "Remis!";
+            return true;
+        }
+
+        return false;
+    }
+
+    function zmienGracza() {
+        const turn = document.getElementById("turn");
+        turn.innerText = turn.innerText === "X" ? "O" : "X";
+        turn.style.color = turn.innerText === "O" ? "red" : "blue";
+    }
+
+    function klikniecie1p() {
+        if (!this.textContent && !wygrana) {
+            this.textContent = "X";
+            if (!sprawdz() && !wygrana) { 
+                ruchKomputera();
+                sprawdz();
+            }
+        }
+    }
+
+    function ruchKomputera() {
+        const puste = Array.from(pola).filter((pole) => !pole.textContent);
+        if (puste.length > 0) {
+            const losowePole = puste[Math.floor(Math.random() * puste.length)];
+            losowePole.textContent = "O";
+        }
+    }
+
+    function klikniecie2p() {
+        if (!this.innerText && !wygrana) {
+            this.innerText = document.getElementById("turn").innerText;
+            sprawdz();
+            if (!wygrana) zmienGracza();
+        }
+    }
+
+    function przypiszKlikniecia(funkcjaKlikniecia) {
+        for (let i = 0; i < pola.length; i++) {
+            pola[i].onclick = funkcjaKlikniecia;
+        }
+    }
+</script>
+
+
+</html>
